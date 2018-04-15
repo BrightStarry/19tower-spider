@@ -47,14 +47,13 @@ public class ParsePostTask implements Runnable{
     /**
      * 关键词数组
      */
-    private static String[] keywordArray;
+    private String[] keywordArray;
 
     private static MatchPostRepository matchPostRepository;
 
     @Autowired
-    public void init(SpiderConfig config, MatchPostRepository matchPostRepository) {
+    public void init(MatchPostRepository matchPostRepository) {
         ParsePostTask.matchPostRepository = matchPostRepository;
-        ParsePostTask.keywordArray = config.getService().getKeyword().split(";");
     }
 
     /**
@@ -74,27 +73,34 @@ public class ParsePostTask implements Runnable{
      */
     private  HttpClientUtil httpClientUtil;
 
-    public ParsePostTask(String path, String title, HttpClientUtil httpClientUtil) {
+    /**
+     * 任务id
+     */
+    private Long taskId;
+
+    public ParsePostTask(String path, String title, HttpClientUtil httpClientUtil,Long taskId,String[] keywordArray) {
         this.path = path;
         this.title = title;
         this.httpClientUtil = httpClientUtil;
+        this.taskId = taskId;
+        this.keywordArray = keywordArray;
     }
 
-    public static void main(String[] args) {
-//        http://taizhou.19lou.com/redirect/post?fid=834&tid=52471515224776506&pid=72841520060886835
-//        http://taizhou.19lou.com/forum-829-thread-163211403098896703-1-1.html
-        ParsePostTask t = new ParsePostTask("http://taizhou.19lou.com/forum-829-thread-163211403098896703-1-1.html",
-                "xxx", new HttpClientUtil(null));
-        t.run1();
-
-    }
+//    public static void main(String[] args) {
+////        http://taizhou.19lou.com/redirect/post?fid=834&tid=52471515224776506&pid=72841520060886835
+////        http://taizhou.19lou.com/forum-829-thread-163211403098896703-1-1.html
+//        ParsePostTask t = new ParsePostTask("http://taizhou.19lou.com/forum-829-thread-163211403098896703-1-1.html",
+//                "xxx", new HttpClientUtil(null),1L,new String[]{"xx"});
+//        t.run1();
+//
+//    }
 
     @Override
     public void run() {
         try {
             run1();
         } catch (Exception e) {
-            log.error("{}异常:{}",LOG,e);
+            log.error("{}异常:",LOG,e);
         }
     }
 
@@ -125,7 +131,7 @@ public class ParsePostTask implements Runnable{
                         if(content.contains(keyword)){
                             log.info("{}匹配成功");
                             // 入库
-                            MatchPost matchPost = new MatchPost(title, currentPath, content,keyword);
+                            MatchPost matchPost = new MatchPost(title, currentPath, content,keyword,taskId);
                             matchPostRepository.save(matchPost);
                             // 只退出当前页,继续该帖子下一页的关键词匹配
                             break;
@@ -183,8 +189,7 @@ public class ParsePostTask implements Runnable{
             String href = HtmlResolver.getElementAttr(html, "a.page-last", "href");
             String href2 = href.substring(0, href.length() - 7);
             String href3 = href2.substring(href2.lastIndexOf("-")+1);
-
-            return 1;
+            return Integer.parseInt(href3);
         } catch (Exception e) {
 //            log.error("{}当前路径:{},获取总页数异常:{}",LOG,formatUri,e.getMessage());
             return 1;

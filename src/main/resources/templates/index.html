@@ -1,0 +1,101 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header ('台州19楼-爬虫Demo-首页')}">
+</head>
+<body>
+
+<div class="container">
+    <div class="jumbotron">
+            <div class="form-group">
+                <label>关键词</label>
+                <input type="text" id="keyword" name="keyword" class="form-control"
+                       placeholder="请输入要查找的关键词,用分号分隔,例如 手机;联通">
+            </div>
+            <button type="button" id="startTaskBtn" class="btn btn-primary">开启新任务</button>
+    </div>
+</div>
+
+<div class="container">
+    <table class="table table-striped">
+        <caption>爬虫任务</caption>
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>状态</th>
+            <th>关键词</th>
+            <th>结束时间</th>
+            <th>帖子详情</th>
+            <th>创建时间</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="spiderTask : ${spiderTaskPageVO.list}" th:object="${spiderTask}">
+
+                <td th:text="*{id}"></td>
+                <td th:text="*{status}"></td>
+                <td th:text="*{keyword}"></td>
+                <td th:text="*{#dates.format(endTime,'yyyy-MM-dd HH:mm:ss')}"></td>
+                <td><a th:href="*{'/' + id+ '/post/list?pageNo=1'}" >点击进入</a></td>
+                <td th:text="*{#dates.format(createTime,'yyyy-MM-dd HH:mm:ss')}"></td>
+
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="container text-center">
+    <ul class="pagination pagination-lg">
+        <li th:class="${spiderTaskPageVO.pageNo == 1 || spiderTaskPageVO.pageNo <=5}   ? 'hidden'">
+            <a href="?pageNo=1" aria-label="Previous">
+                <span aria-hidden="true">«</span>
+            </a>
+        </li>
+
+        <li th:each="i : ${#numbers.sequence(spiderTaskPageVO.pageNo <= 5 ? 1 : spiderTaskPageVO.pageNo - 4 ,
+        spiderTaskPageVO.totalPage <= 10 ? spiderTaskPageVO.totalPage
+        : (spiderTaskPageVO.pageNo + 4 <=  spiderTaskPageVO.totalPage) ? spiderTaskPageVO.pageNo + 4
+        : spiderTaskPageVO.totalPage)}"
+
+            th:class="${spiderTaskPageVO.pageNo == i} ? 'active'">
+            <a th:href="${'?pageNo=' + i}" th:text="${i}"></a>
+        </li>
+
+        <li th:class="${spiderTaskPageVO.pageNo == spiderTaskPageVO.totalPage || spiderTaskPageVO.pageNo >= spiderTaskPageVO.totalPage - 4} ? 'hidden'">
+            <a th:href="${'?pageNo=' + spiderTaskPageVO.totalPage}"
+
+
+               aria-label="Next">
+                <span aria-hidden="true">»</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<span th:include="~{fragments/common :: js}"></span>
+</body>
+</html>
+<script>
+    $(function () {
+        $('#startTaskBtn').click(function () {
+            var keyword = $('#keyword').val();
+            if (!keyword) {
+                alert('关键词不能为空');
+                return;
+            }
+            if (keyword.length > 1024) {
+                alert('关键词过长');
+                return;
+            }
+            $.post('/start', {'keyword': keyword}, function (result) {
+                if (result.code === '0000') {
+                    alert('任务启动成功');
+                    location.reload();
+                } else {
+                    alert(result.message)
+                }
+            });
+        });
+    });
+</script>

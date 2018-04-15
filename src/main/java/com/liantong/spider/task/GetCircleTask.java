@@ -131,11 +131,11 @@ public class GetCircleTask implements Runnable{
         return html;
     }
 
-    public static void main(String[] args) {
-        HttpClientUtil.DefaultHttpClientConfig config = new HttpClientUtil.DefaultHttpClientConfig();
-        config.setCustomCookieKeys(Collections.singletonList("a"));
-        HttpClientUtil httpClientUtil = new HttpClientUtil(null);
-        GetCircleTask task = new GetCircleTask(httpClientUtil, new SpiderQueue(new SpiderConfig()));
-        task.run1();
-    }
+//    public static void main(String[] args) {
+//        HttpClientUtil.DefaultHttpClientConfig config = new HttpClientUtil.DefaultHttpClientConfig();
+//        config.setCustomCookieKeys(Collections.singletonList("a"));
+//        HttpClientUtil httpClientUtil = new HttpClientUtil(null);
+//        GetCircleTask task = new GetCircleTask(httpClientUtil, new SpiderQueue(new SpiderConfig()));
+//        task.run1();
+//    }
 }

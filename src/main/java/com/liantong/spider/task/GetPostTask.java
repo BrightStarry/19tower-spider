@@ -1,6 +1,5 @@
 package com.liantong.spider.task;
 
-import com.liantong.spider.config.SpiderConfig;
 import com.liantong.spider.dto.Post;
 import com.liantong.spider.queue.SpiderQueue;
 import com.liantong.spider.util.HtmlResolver;
@@ -57,7 +56,7 @@ public class GetPostTask implements Runnable{
         try {
             run1();
         } catch (Exception e) {
-            log.error("{}异常:{}",LOG,e);
+            log.error("{}异常:",LOG,e);
         }
     }
 
@@ -94,7 +93,6 @@ public class GetPostTask implements Runnable{
                      */
                     String path = postElement.attr("data-url");
                     Post post = new Post(postTitle, path);
-                    log.info("-{}",post);
                     //路径中不包含"board",才入队
                     if(!path.contains("board")){
                         log.info("{}加入队列:{}",LOG,post);
@@ -127,8 +125,8 @@ public class GetPostTask implements Runnable{
         }
     }
 
-    public static void main(String[] args) {
-        GetPostTask getPostTask = new GetPostTask("http://taizhou.19lou.com/r/37/hlxcch-%d.html", "aaa", new HttpClientUtil(null), new SpiderQueue(new SpiderConfig()));
-        getPostTask.run1();
-    }
+//    public static void main(String[] args) {
+//        GetPostTask getPostTask = new GetPostTask("http://taizhou.19lou.com/r/37/hlxcch-%d.html", "aaa", new HttpClientUtil(null), new SpiderQueue(new SpiderConfig()));
+//        getPostTask.run1();
+//    }
 }

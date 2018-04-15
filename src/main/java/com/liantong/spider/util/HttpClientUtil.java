@@ -479,7 +479,7 @@ public class HttpClientUtil {
     @NoArgsConstructor
     @Accessors(chain = true)
     public static class DefaultHttpClientConfig implements HttpClientConfigurable {
-        private Integer maxConnectionNum = 300;
+        private Integer maxConnectionNum = 1000;
         private Integer maxPerRoute = Integer.MAX_VALUE;
         private Integer socketTimeout = 2000;
         private Integer connectionRequestTimeout = 2000;

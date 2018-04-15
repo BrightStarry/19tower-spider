@@ -1,0 +1,68 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header ('台州19楼-爬虫Demo-帖子列表页')}">
+</head>
+<body>
+
+<div class="container">
+    <div class="jumbotron">
+        <h3>当前任务id:<span th:text="${spiderTask.id}"></span></h3>
+        <h4>当前任务关键词:<span th:text="${spiderTask.keyword}"></span></h4>
+    </div>
+</div>
+
+<div class="container"  >
+    <table class="table table-striped" >
+        <caption>匹配的帖子</caption>
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>帖子标题</th>
+            <th>匹配关键词</th>
+            <th>回复内容</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="matchPost : ${matchPostPageVO.list}" th:object="${matchPost}">
+            <td th:text="*{id}"></td>
+            <td ><a th:href="*{uri}" target="_blank" th:text="*{title}"></a></td>
+            <td th:text="*{keyword}"></td>
+            <td th:text="*{content}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="container text-center">
+    <ul class="pagination pagination-lg">
+        <li th:class="${matchPostPageVO.pageNo == 1 || matchPostPageVO.pageNo <=5}   ? 'hidden'">
+            <a th:href="${'/' +matchPostPageVO.serviceId +'/post/list?pageNo=1'}" aria-label="Previous">
+                <span aria-hidden="true">«</span>
+            </a>
+        </li>
+
+        <li th:each="i : ${#numbers.sequence(matchPostPageVO.pageNo <= 5 ? 1 : matchPostPageVO.pageNo - 4 ,
+        matchPostPageVO.totalPage <= 10 ? matchPostPageVO.totalPage
+        : (matchPostPageVO.pageNo + 4 <=  matchPostPageVO.totalPage) ? matchPostPageVO.pageNo + 4
+        : matchPostPageVO.totalPage)}"
+
+            th:class="${matchPostPageVO.pageNo == i} ? 'active'">
+            <a th:text="${i}" th:href="${'/' +matchPostPageVO.serviceId +'/post/list?pageNo=' + i}"></a>
+        </li>
+
+        <li th:class="${matchPostPageVO.pageNo == matchPostPageVO.totalPage || matchPostPageVO.pageNo >= matchPostPageVO.totalPage - 4} ? 'hidden'">
+            <a  th:href="${'/' +matchPostPageVO.serviceId +'/post/list?pageNo=' +matchPostPageVO.totalPage}"
+               aria-label="Next">
+                <span aria-hidden="true">»</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<span th:include="~{fragments/common :: js}"></span>
+</body>
+</html>
+<script>
+
+</script>

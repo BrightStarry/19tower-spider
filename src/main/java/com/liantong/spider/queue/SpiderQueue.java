@@ -9,30 +9,36 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * author:ZhengXing
  * datetime:2018-04-13 19:09
  * 爬虫队列
  */
-@Component
 public class SpiderQueue {
 
     /**
      * 圈子队列
      * 存储 {@link com.liantong.spider.dto.Circle}
      */
-    private BlockingQueue<Circle> circleQueue;
+    private final BlockingQueue<Circle> circleQueue;
 
     /**
      * 帖子队列
      * 存储 {@link com.liantong.spider.dto.Post}
      */
-    private BlockingQueue<Post> postQueue;
+    private final BlockingQueue<Post> postQueue;
+
+    /**
+     * 超时时间
+     */
+    private final Integer takeTimeoutSecond;
 
     public SpiderQueue(SpiderConfig config) {
         circleQueue = new LinkedBlockingQueue<>(config.getQueueConfig().getQueueSize());
         postQueue = new LinkedBlockingQueue<>(config.getQueueConfig().getQueueSize());
+        takeTimeoutSecond = config.getQueueConfig().getTakeTimeoutSecond();
     }
 
     /**
@@ -48,7 +54,7 @@ public class SpiderQueue {
      */
     @SneakyThrows
     public Circle takeFromCircleQueue() {
-        return circleQueue.take();
+        return circleQueue.poll(takeTimeoutSecond, TimeUnit.SECONDS);
     }
 
     /**
@@ -64,6 +70,6 @@ public class SpiderQueue {
      */
     @SneakyThrows
     public Post takeFromPostQueue() {
-        return postQueue.take();
+        return postQueue.poll(takeTimeoutSecond, TimeUnit.SECONDS);
     }
 }

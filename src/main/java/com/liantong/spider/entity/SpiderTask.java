@@ -14,8 +14,8 @@ import java.util.Date;
 
 /**
  * author:ZhengXing
- * datetime:2018-04-14 15:21
- * 与关键词匹配的帖子
+ * datetime:2018-04-14 21:40
+ * 爬虫任务
  */
 @Entity
 @Data
@@ -23,7 +23,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Accessors(chain = true)
 @DynamicUpdate
-public class MatchPost {
+public class SpiderTask {
 
     /**
      * id
@@ -33,29 +33,20 @@ public class MatchPost {
     private Long id;
 
     /**
-     * 帖子标题
+     * 任务状态
+     * see {@link com.liantong.spider.enums.SpiderTaskStatusEnum}
      */
-    private String title;
+    private Integer status;
 
     /**
-     * uri
-     */
-    private String uri;
-
-    /**
-     * 内容
-     */
-    private String content;
-
-    /**
-     * 匹配的关键词
+     * 关键词,用分号分割
      */
     private String keyword;
 
     /**
-     * 任务id
+     * 任务结束时间
      */
-    private Long spiderTaskId;
+    private Date endTime;
 
     /**
      * 创建时间
@@ -67,11 +58,9 @@ public class MatchPost {
      */
     private Date updateTime;
 
-    public MatchPost(String title, String uri, String content,String keyword,Long spiderTaskId) {
-        this.title = title;
-        this.uri = uri;
-        this.content = content;
+
+    public SpiderTask(Integer status, String keyword) {
+        this.status = status;
         this.keyword = keyword;
-        this.spiderTaskId = spiderTaskId;
     }
 }

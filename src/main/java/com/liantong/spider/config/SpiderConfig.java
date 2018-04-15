@@ -47,6 +47,11 @@ public class SpiderConfig {
          * 队列最大长度
          */
         private Integer queueSize = 10240;
+
+        /**
+         * 队列获取超时时间,超时后,默认该任务已经结束
+         */
+        private Integer takeTimeoutSecond = 60;
     }
 
     /**
@@ -57,11 +62,6 @@ public class SpiderConfig {
     @NoArgsConstructor
     public static class Service{
         /**
-         * 要匹配的关键词,用分号分割
-         */
-        private String keyword = "美女;妹子";
-
-        /**
          * 获取帖子任务线程数
          */
         private Integer getPostTaskThreadNum = 1;
@@ -70,5 +70,21 @@ public class SpiderConfig {
          * 解析帖子任务线程数
          */
         private Integer parsePostTaskThreadNum = 1;
+
+        /**
+         * 最多同时运行 {@link com.liantong.spider.entity.SpiderTask} 任务个数
+         */
+        private Integer maxRunningSpiderTaskNum = 3;
+
+        /**
+         * 分页查询,默认每天记录数
+         */
+        private Integer defaultPageSize = 5;
+
+        /**
+         * 任务超过多少时间还未结束,判定为失败任务
+         */
+        private Integer errorTaskTimeoutMs = 1000 * 60 * 120;
+
     }
 }
