@@ -7,12 +7,12 @@
 
 <div class="container">
     <div class="jumbotron">
-            <div class="form-group">
-                <label>关键词</label>
-                <input type="text" id="keyword" name="keyword" class="form-control"
-                       placeholder="请输入要查找的关键词,用分号分隔,例如 手机;联通">
-            </div>
-            <button type="button" id="startTaskBtn" class="btn btn-primary">开启新任务</button>
+        <div class="form-group">
+            <label>关键词</label>
+            <input type="text" id="keyword" name="keyword" class="form-control"
+                   placeholder="请输入要查找的关键词,用分号分隔,例如 手机;联通">
+        </div>
+        <button type="button" id="startTaskBtn" class="btn btn-primary">开启新任务</button>
     </div>
 </div>
 
@@ -22,24 +22,30 @@
         <thead>
         <tr>
             <th>id</th>
-            <th>状态</th>
             <th>关键词</th>
+            <th>状态</th>
+            <th>开始时间</th>
             <th>结束时间</th>
             <th>帖子详情</th>
-            <th>创建时间</th>
-
+            <th>操作</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="spiderTask : ${spiderTaskPageVO.list}" th:object="${spiderTask}">
 
-                <td th:text="*{id}"></td>
-                <td th:text="*{status}"></td>
-                <td th:text="*{keyword}"></td>
-                <td th:text="*{#dates.format(endTime,'yyyy-MM-dd HH:mm:ss')}"></td>
-                <td><a th:href="*{'/' + id+ '/post/list?pageNo=1'}" >点击进入</a></td>
-                <td th:text="*{#dates.format(createTime,'yyyy-MM-dd HH:mm:ss')}"></td>
-
+            <td th:text="*{id}"></td>
+            <td th:text="*{keyword}"></td>
+            <td th:text="*{status}"></td>
+            <td th:text="*{#dates.format(createTime,'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="*{#dates.format(endTime,'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td><a th:href="*{'/' + id+ '/post/list?pageNo=1'}">点击进入</a></td>
+            <td>
+                <button type="button" id="interruptBtn" th:if="*{status} == '运行中'" th:onclick="*{'interruptSpiderTask('+ id +')'}" class="btn btn-danger">中断</button>
+                <button type="button" id="deleteBtn"   th:onclick="*{'deleteSpiderTask('+ id +')'}" class="btn btn-danger" th:if="*{status} != '运行中'"
+                        data-toggle="popover" data-placement="right"
+                        data-content="删除中...请等待"
+                >删除</button>
+            </td>
         </tr>
         </tbody>
     </table>
@@ -78,6 +84,7 @@
 </html>
 <script>
     $(function () {
+        $("[data-toggle='popover']").popover();
         $('#startTaskBtn').click(function () {
             var keyword = $('#keyword').val();
             if (!keyword) {
@@ -90,7 +97,7 @@
             }
             $.post('/start', {'keyword': keyword}, function (result) {
                 if (result.code === '0000') {
-                    alert('任务启动成功');
+                    alert('任务启动成功.\n任务开启后,可点击详情按钮进入详情页,查看搜索到的帖子,可手动刷新详情页,查看最新结果');
                     location.reload();
                 } else {
                     alert(result.message)
@@ -98,4 +105,33 @@
             });
         });
     });
+
+
+    /**
+     * 中断任务
+     */
+    function interruptSpiderTask(spiderTaskId) {
+        $.post('/interrupt',{'spiderTaskId':spiderTaskId},function (result) {
+            if (result.code === '0000') {
+                alert('中断成功');
+                location.reload();
+            } else {
+                alert(result.message)
+            }
+        });
+    }
+
+    /**
+     * 删除任务
+     */
+    function deleteSpiderTask(spiderTaskId) {
+        $.post('/deleteTask',{'spiderTaskId':spiderTaskId},function (result) {
+            if (result.code === '0000') {
+                alert('删除成功');
+                location.reload();
+            } else {
+                alert(result.message)
+            }
+        });
+    }
 </script>

@@ -1,0 +1,17 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header ('台州19楼-爬虫Demo-帖子列表页')}">
+</head>
+<body>
+
+<div class="container">
+    <div class="jumbotron">
+        <div class="alert alert-danger" >发生异常:<span th:text="${message}"></span></div>
+    </div>
+</div>
+
+
+<span th:include="~{fragments/common :: js}"></span>
+</body>
+</html>

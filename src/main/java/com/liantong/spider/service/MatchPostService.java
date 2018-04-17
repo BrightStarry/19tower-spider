@@ -12,4 +12,6 @@ import org.springframework.data.domain.Pageable;
  */
 public interface MatchPostService {
     PageVO<MatchPost> listMatchPostByPage(Pageable pageable, long spiderTaskId);
+
+    void deleteAllBySpiderTaskId(long spiderTaskId);
 }

@@ -79,12 +79,12 @@ public class SpiderConfig {
         /**
          * 分页查询,默认每天记录数
          */
-        private Integer defaultPageSize = 5;
+        private Integer defaultPageSize = 10;
 
         /**
-         * 任务超过多少时间还未结束,判定为失败任务
+         * 任务超过多少时间还未结束,结束该任务. 分钟
          */
-        private Integer errorTaskTimeoutMs = 1000 * 60 * 120;
+        private Integer errorTaskTimeoutMinute = 300;
 
     }
 }

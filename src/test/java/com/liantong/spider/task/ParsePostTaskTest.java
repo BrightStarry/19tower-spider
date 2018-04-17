@@ -13,13 +13,7 @@ import static org.junit.Assert.*;
  */
 public class ParsePostTaskTest extends ApplicationTests{
 
-    @Autowired
-    private HttpClientUtil httpClientUtil;
 
-    @Test
-    public void testRun1() {
-//        ParsePostTask a = new ParsePostTask("http://taizhou.19lou.com/forum-2163-thread-52901523454809112-1-1.html", "帖子标题", httpClientUtil);
-//        a.run();
-    }
+
 
 }

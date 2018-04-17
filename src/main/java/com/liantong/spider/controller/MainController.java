@@ -2,6 +2,8 @@ package com.liantong.spider.controller;
 
 import com.liantong.spider.entity.MatchPost;
 import com.liantong.spider.exception.CustomException;
+import com.liantong.spider.form.DeleteSpiderTaskAndAllPostForm;
+import com.liantong.spider.form.InterruptSpiderTaskForm;
 import com.liantong.spider.form.PageForm;
 import com.liantong.spider.form.StartSpiderTaskForm;
 import com.liantong.spider.service.MatchPostService;
@@ -59,6 +61,17 @@ public class MainController implements ControllerPlus{
     }
 
     /**
+     * 中断任务
+     */
+    @PostMapping("/interrupt")
+    @ResponseBody
+    public ResultVO interruptSpiderTask(InterruptSpiderTaskForm form,BindingResult bindingResult){
+        isValid(bindingResult);
+        spiderTaskService.interruptSpiderTask(form.getSpiderTaskId());
+        return ResultVO.success();
+    }
+
+    /**
      * 某任务的 匹配帖子列表页
      */
     @GetMapping("/{spiderTaskId}/post/list")
@@ -67,14 +80,26 @@ public class MainController implements ControllerPlus{
         if(spiderTaskId == null)
             throw new CustomException("该任务不存在");
 
-
+        // 帖子列表
         PageVO<MatchPost> matchPostPageVO = matchPostService.listMatchPostByPage(buildPageable(form.getPageNo(), form.getPageSize()), spiderTaskId);
         matchPostPageVO.setServiceId(spiderTaskId);
         model.addAttribute("matchPostPageVO", matchPostPageVO);
 
+        // 该任务信息
         SpiderTaskVO spiderTaskVO = spiderTaskService.selectSpiderTaskVOById(spiderTaskId);
         model.addAttribute("spiderTask", spiderTaskVO);
 
         return "matchPostList";
+    }
+
+    /**
+     * 删除某爬虫任务和其下所有帖子记录
+     */
+    @PostMapping("/deleteTask")
+    @ResponseBody
+    public ResultVO deleteSpiderTaskAndAllPost(DeleteSpiderTaskAndAllPostForm form, BindingResult bindingResult) {
+        isValid(bindingResult);
+        spiderTaskService.deleteOne(form.getSpiderTaskId());
+        return ResultVO.success();
     }
 }

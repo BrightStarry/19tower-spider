@@ -20,4 +20,8 @@ public interface SpiderTaskService {
 
     SpiderTaskVO selectSpiderTaskVOById(long spiderTaskId);
 
+    void interruptSpiderTask(Long spiderTaskId);
+
+    void deleteOne(long spiderTaskId);
+
 }

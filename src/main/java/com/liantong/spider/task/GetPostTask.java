@@ -43,17 +43,27 @@ public class GetPostTask implements Runnable{
      */
     private final SpiderQueue spiderQueue;
 
-    public GetPostTask(String path, String circleName,HttpClientUtil httpClientUtil, SpiderQueue spiderQueue) {
+    /**
+     * 主任务
+     */
+    private volatile SpiderMainTask spiderMainTask;
+
+
+
+    public GetPostTask(String path, String circleName, HttpClientUtil httpClientUtil, SpiderQueue spiderQueue, SpiderMainTask spiderMainTask) {
         this.path = path;
         this.circleName = circleName;
         this.httpClientUtil = httpClientUtil;
         this.spiderQueue = spiderQueue;
+        this.spiderMainTask = spiderMainTask;
     }
 
 
     @Override
     public void run() {
         try {
+            if(spiderMainTask.isInterrupt)
+                return;
             run1();
         } catch (Exception e) {
             log.error("{}异常:",LOG,e);
@@ -74,6 +84,8 @@ public class GetPostTask implements Runnable{
         String currentPath = "";
         // 循环解析每一页
         for (int i = 1; i <= maxPage ; i++) {
+            if(spiderMainTask.isInterrupt)
+                return;
             try {
                  currentPath  = String.format(path,i);
                  html = httpClientUtil.doGetByChrome(currentPath);

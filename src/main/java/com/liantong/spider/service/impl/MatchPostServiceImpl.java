@@ -8,6 +8,7 @@ import com.liantong.spider.vo.PageVO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -31,4 +32,13 @@ public class MatchPostServiceImpl implements MatchPostService {
         Page<MatchPost> page = matchPostRepository.findAllBySpiderTaskId(pageable, spiderTaskId);
         return JPAPage2PageVOConverter.convert(page);
     }
+
+    /**
+     * 根据爬虫任务id 删除所有匹配的帖子
+     */
+    @Transactional
+    public void deleteAllBySpiderTaskId(long spiderTaskId) {
+        matchPostRepository.deleteBySpiderTaskId(spiderTaskId);
+    }
+
 }

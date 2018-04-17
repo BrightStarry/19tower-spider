@@ -1,6 +1,5 @@
 package com.liantong.spider.task;
 
-import com.liantong.spider.config.SpiderConfig;
 import com.liantong.spider.dto.Circle;
 import com.liantong.spider.queue.SpiderQueue;
 import com.liantong.spider.util.HtmlResolver;
@@ -8,8 +7,6 @@ import com.liantong.spider.util.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
-
-import java.util.Collections;
 
 /**
  * author:ZhengXing
@@ -49,9 +46,21 @@ public class GetCircleTask implements Runnable{
      */
     private final SpiderQueue spiderQueue;
 
-    public GetCircleTask(HttpClientUtil httpClientUtil, SpiderQueue spiderQueue) {
+    /**
+     * 主任务
+     */
+    private volatile SpiderMainTask spiderMainTask;
+
+    /**
+     * 任务id
+     */
+    private final Long spiderTaskId;
+
+    public GetCircleTask(HttpClientUtil httpClientUtil, SpiderQueue spiderQueue, SpiderMainTask spiderMainTask, Long spiderTaskId) {
         this.httpClientUtil = httpClientUtil;
         this.spiderQueue = spiderQueue;
+        this.spiderMainTask = spiderMainTask;
+        this.spiderTaskId = spiderTaskId;
     }
 
 
@@ -71,6 +80,10 @@ public class GetCircleTask implements Runnable{
         // 循环每一页
         for (int i = 1; i <= maxPage; i++) {
             try {
+                if(spiderMainTask.isInterrupt){
+                    log.info("{}当前任务id:{},任务被中断.",LOG,spiderTaskId);
+                    return;
+                }
                 // 获取html
                 String html = getHtml(i);
                 // 为空时跳过

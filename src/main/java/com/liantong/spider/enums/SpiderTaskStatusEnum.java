@@ -14,7 +14,7 @@ import lombok.Getter;
 public enum SpiderTaskStatusEnum implements CodeEnum<Integer>{
     RUNNING(0, "运行中"),
     END(1, "结束"),
-    ERROR(2, "失败"),
+    INTERRUPT(2, "中断"),
     ;
     private Integer code;
     private String message;

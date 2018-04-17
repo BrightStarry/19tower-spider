@@ -6,12 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
+import org.springframework.validation.BindingResult;
 
 /**
  * author:ZhengXing
  * datetime:2018-04-15 11:20
  * 开启新任务接口 表单
- * see {@link com.liantong.spider.controller.MainController#startSpiderTask(String)}
+ * see {@link com.liantong.spider.controller.MainController#startSpiderTask(StartSpiderTaskForm, BindingResult)}
  */
 @Accessors(chain = true)
 @AllArgsConstructor

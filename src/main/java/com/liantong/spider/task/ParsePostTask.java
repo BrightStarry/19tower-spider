@@ -1,15 +1,12 @@
 package com.liantong.spider.task;
 
-import com.liantong.spider.config.SpiderConfig;
 import com.liantong.spider.entity.MatchPost;
 import com.liantong.spider.repository.MatchPostRepository;
 import com.liantong.spider.util.HtmlResolver;
 import com.liantong.spider.util.HttpClientUtil;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -21,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * author:ZhengXing
@@ -78,12 +76,18 @@ public class ParsePostTask implements Runnable{
      */
     private Long taskId;
 
-    public ParsePostTask(String path, String title, HttpClientUtil httpClientUtil,Long taskId,String[] keywordArray) {
+    /**
+     * 主任务
+     */
+    private volatile SpiderMainTask spiderMainTask;
+
+    public ParsePostTask(String path, String title, HttpClientUtil httpClientUtil, Long taskId, String[] keywordArray, SpiderMainTask spiderMainTask) {
         this.path = path;
         this.title = title;
         this.httpClientUtil = httpClientUtil;
         this.taskId = taskId;
         this.keywordArray = keywordArray;
+        this.spiderMainTask = spiderMainTask;
     }
 
 //    public static void main(String[] args) {
@@ -98,6 +102,8 @@ public class ParsePostTask implements Runnable{
     @Override
     public void run() {
         try {
+            if(spiderMainTask.isInterrupt)
+                return;
             run1();
         } catch (Exception e) {
             log.error("{}异常:",LOG,e);
@@ -117,6 +123,8 @@ public class ParsePostTask implements Runnable{
 
         String currentPath = null;
         for (int i = 1; i <= maxPage ; i++) {
+            if(spiderMainTask.isInterrupt)
+                return;
             try {
                 currentPath = String.format(formatUri, i);
                 String html = httpClientUtil.doGet(currentPath, null, null, DEFAULT_HEADER_KEY);
@@ -131,7 +139,7 @@ public class ParsePostTask implements Runnable{
                         if(content.contains(keyword)){
                             log.info("{}匹配成功");
                             // 入库
-                            MatchPost matchPost = new MatchPost(title, currentPath, content,keyword,taskId);
+                            MatchPost matchPost = new MatchPost(title, currentPath, content,keyword,taskId).setCreateTime(new Date());
                             matchPostRepository.save(matchPost);
                             // 只退出当前页,继续该帖子下一页的关键词匹配
                             break;

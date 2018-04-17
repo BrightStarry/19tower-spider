@@ -12,18 +12,19 @@
     </div>
 </div>
 
-<div class="container"  >
+<!--此处直接修改了bootstrap.min.css 源码，将小于765px显示滚动条改为小于1500，显示滚动条-->
+<div class="table-responsive"  >
     <table class="table table-striped" >
         <caption>匹配的帖子</caption>
         <thead>
         <tr>
             <th>id</th>
             <th>帖子标题</th>
-            <th>匹配关键词</th>
+            <th>关键词</th>
             <th>回复内容</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="matchPostTableBody">
         <tr th:each="matchPost : ${matchPostPageVO.list}" th:object="${matchPost}">
             <td th:text="*{id}"></td>
             <td ><a th:href="*{uri}" target="_blank" th:text="*{title}"></a></td>
@@ -65,4 +66,39 @@
 </html>
 <script>
 
+    $(function () {
+
+        /**
+         * 遍历表格，让关键词高亮
+         */
+        $("#matchPostTableBody").find("tr").each(function(){
+            // 关键词
+            var keyword = $(this).children().eq(2).text();
+            // 内容tr
+            var contentTr = $(this).children().eq(3);
+            keyLight(contentTr[0],keyword,'yellow');
+        });
+    });
+
+    /**
+     * 关键词高亮方法
+     */
+    function keyLight(ele, key, bgColor){
+        var oDiv = ele;
+        sText = oDiv.innerHTML;
+        bgColor = bgColor || "orange",
+            sKey = "<span style='background-color: "+bgColor+";'>"+key+"</span>",
+            num = -1,
+            rStr = new RegExp(key, "g"),
+            rHtml = new RegExp("\<.*?\>","ig"), //匹配html元素
+            aHtml = sText.match(rHtml); //存放html元素的数组
+        sText = sText.replace(rHtml, '{~}');  //替换html标签
+        sText = sText.replace(rStr,sKey); //替换key
+        sText = sText.replace(/{~}/g,function(){  //恢复html标签
+            num++;
+            return aHtml[num];
+        });
+
+        oDiv.innerHTML = sText;
+    }
 </script>

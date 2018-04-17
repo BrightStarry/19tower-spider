@@ -19,4 +19,9 @@ public interface MatchPostRepository extends JpaRepository<MatchPost,Long>{
      * 根据任务id 分页查询
      */
     Page<MatchPost> findAllBySpiderTaskId(Pageable pageable, long SpiderTaskId);
+
+    /**
+     * 根据 任务id 删除
+     */
+    int deleteBySpiderTaskId(long spiderTaskId);
 }
