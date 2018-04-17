@@ -479,10 +479,10 @@ public class HttpClientUtil {
     @NoArgsConstructor
     @Accessors(chain = true)
     public static class DefaultHttpClientConfig implements HttpClientConfigurable {
-        private Integer maxConnectionNum = 500;
+        private Integer maxConnectionNum = 600;
         private Integer maxPerRoute = Integer.MAX_VALUE;
         private Integer socketTimeout = 2000;
-        private Integer connectionRequestTimeout = 2000;
+        private Integer connectionRequestTimeout = 5000;
         private Integer connectionTimeout = 2000;
         private List<String> customCookieKeys = new LinkedList<>();
         private Map<String, List<Header>> customHeaders = new HashMap<>();

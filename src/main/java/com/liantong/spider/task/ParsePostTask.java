@@ -42,6 +42,8 @@ public class ParsePostTask implements Runnable{
     // httpClientUtil中header的key
     public static final String DEFAULT_HEADER_KEY = "postHeader";
 
+    public static final String URL_PRE = "http://taizhou.19lou.com";
+
     /**
      * 关键词数组
      */
@@ -171,7 +173,8 @@ public class ParsePostTask implements Runnable{
         try {
             httpClient.execute(httpGet, httpContext);
             HttpUriRequest realRequest = (HttpUriRequest)httpContext.getAttribute(HttpCoreContext.HTTP_REQUEST);
-            return realRequest.getURI().getQuery();
+            String result =  realRequest.getURI().getQuery();
+            return StringUtils.isEmpty(result) ? URL_PRE + realRequest.getURI().getPath() : result;
         } catch (IOException e) {
             log.error("{}当前帖子名:{},当前路径:{},获取真实路径失败,异常:{}",LOG,title,path,e);
             return StringUtils.EMPTY;

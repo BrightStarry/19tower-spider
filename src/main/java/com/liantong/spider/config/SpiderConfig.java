@@ -64,12 +64,12 @@ public class SpiderConfig {
         /**
          * 获取帖子任务线程数
          */
-        private Integer getPostTaskThreadNum = 1;
+        private Integer getPostTaskThreadNum = 2;
 
         /**
          * 解析帖子任务线程数
          */
-        private Integer parsePostTaskThreadNum = 1;
+        private Integer parsePostTaskThreadNum = 2;
 
         /**
          * 最多同时运行 {@link com.liantong.spider.entity.SpiderTask} 任务个数
