@@ -86,7 +86,7 @@
     $(function () {
         $("[data-toggle='popover']").popover();
         $('#startTaskBtn').click(function () {
-            var keyword = $('#keyword').val();
+            var keyword = $('#keyword').val().trim();
             if (!keyword) {
                 alert('关键词不能为空');
                 return;

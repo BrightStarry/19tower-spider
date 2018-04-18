@@ -124,7 +124,8 @@ public class ParsePostTask implements Runnable{
         int maxPage = getMaxPage(formatUri);
 
         String currentPath = null;
-        for (int i = 1; i <= maxPage ; i++) {
+        int i;
+        for (i = 1; i <= maxPage ; i++) {
             if(spiderMainTask.isInterrupt)
                 return;
             try {
@@ -134,18 +135,22 @@ public class ParsePostTask implements Runnable{
                 Elements towers = HtmlResolver.getElements(html, "#view-bd > .clearall.floor");
                 //循环每一楼
                 for (Element tower : towers) {
-                    // 回复内容
-                    String content = HtmlResolver.getElementText(tower, ".thread-cont");
-                    // 匹配每个关键词, 如果包含
-                    for (String keyword : keywordArray) {
-                        if(content.contains(keyword)){
-                            log.info("{}匹配成功");
-                            // 入库
-                            MatchPost matchPost = new MatchPost(title, currentPath, content,keyword,taskId).setCreateTime(new Date());
-                            matchPostRepository.save(matchPost);
-                            // 只退出当前页,继续该帖子下一页的关键词匹配
-                            break;
+                    try {
+                        // 回复内容
+                        String content = HtmlResolver.getElementText(tower, ".thread-cont");
+                        // 匹配每个关键词, 如果包含
+                        for (String keyword : keywordArray) {
+                            if(content.contains(keyword)){
+                                log.info("{}匹配成功");
+                                // 入库
+                                MatchPost matchPost = new MatchPost(title, currentPath, content,keyword,taskId).setCreateTime(new Date());
+                                matchPostRepository.save(matchPost);
+                                // 只退出当前页,继续该帖子下一页的关键词匹配
+                                break;
+                            }
                         }
+                    } catch (Exception e) {
+                        log.error("{}当前路径:{},解析第{}页楼层回复失败,异常:{}",LOG,currentPath,i,e);
                     }
                 }
 
@@ -153,6 +158,7 @@ public class ParsePostTask implements Runnable{
                 log.error("{}当前路径:{},解析第{}页失败,异常:{}",LOG,currentPath,i,e);
             }
         }
+        log.info("{}当前帖子:{},循环完毕,共{}页.当前路径:{}",LOG,title,--i,path);
 
 
     }
@@ -174,7 +180,11 @@ public class ParsePostTask implements Runnable{
             httpClient.execute(httpGet, httpContext);
             HttpUriRequest realRequest = (HttpUriRequest)httpContext.getAttribute(HttpCoreContext.HTTP_REQUEST);
             String result =  realRequest.getURI().getQuery();
-            return StringUtils.isEmpty(result) ? URL_PRE + realRequest.getURI().getPath() : result;
+           result = StringUtils.isEmpty(result) ? URL_PRE + realRequest.getURI().getPath() : result;
+           if(StringUtils.isBlank(result) )
+               return "";
+           return result;
+
         } catch (IOException e) {
             log.error("{}当前帖子名:{},当前路径:{},获取真实路径失败,异常:{}",LOG,title,path,e);
             return StringUtils.EMPTY;

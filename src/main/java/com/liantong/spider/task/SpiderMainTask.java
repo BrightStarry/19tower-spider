@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * author:ZhengXing
@@ -28,6 +29,7 @@ public class SpiderMainTask {
     private final SpiderTaskRepository  spiderTaskRepository;
     private final HttpClientUtilFactory httpClientUtilFactory;
     private final SpiderTaskManager spiderTaskManager;
+    private final SpiderConfig spiderConfig;
 
     /**
      * 获取帖子任务 线程池
@@ -59,9 +61,17 @@ public class SpiderMainTask {
      */
     public volatile Boolean isInterrupt = false;
 
+    /**
+     * httpClient连接池
+     */
+    private  HttpClientUtil httpClientUtil;
+
+
+
 
 
     public SpiderMainTask(SpiderConfig spiderConfig, SpiderTaskRepository spiderTaskRepository, HttpClientUtilFactory httpClientUtilFactory, SpiderTaskManager spiderTaskManager, String keyword) {
+        this.spiderConfig = spiderConfig;
         this.spiderQueue = new SpiderQueue(spiderConfig);
         this.getPostExecutorService = Executors.newFixedThreadPool(spiderConfig.getService().getGetPostTaskThreadNum());
         this.parsePostExecutorService = Executors.newFixedThreadPool(spiderConfig.getService().getParsePostTaskThreadNum());
@@ -90,7 +100,7 @@ public class SpiderMainTask {
 
 
         // 创建新的http线程池
-        HttpClientUtil httpClientUtil = httpClientUtilFactory.buildDefaultHttpClientUtil();
+        this.httpClientUtil = httpClientUtilFactory.buildDefaultHttpClientUtil();
 
         // 关键词数组
         final String[] keywordArray = keyword.split(";");
@@ -105,9 +115,12 @@ public class SpiderMainTask {
             while (true){
                 try {
                     Circle circle = spiderQueue.takeFromCircleQueue();
+                    // 如果是执行完毕
                     if (circle == null || isInterrupt) {
                         log.info("当前任务id:{},获取帖子任务结束",spiderTask.getId());
+                        // 关闭线程池, 并等待线程执行完毕,直到超时
                         getPostExecutorService.shutdown();
+                        getPostExecutorService.awaitTermination(spiderConfig.getService().getErrorTaskTimeoutMinute(), TimeUnit.MINUTES);
                         return;
                     }
                     getPostExecutorService.execute(new GetPostTask(circle.getPath(),circle.getTitle(),httpClientUtil,spiderQueue, this));
@@ -122,10 +135,17 @@ public class SpiderMainTask {
             while (true){
                 try {
                     Post post = spiderQueue.takeFromPostQueue();
-                    if (post == null || isInterrupt) {
+                    // 如果是执行完毕
+                    if (post == null ) {
+                        // 等待线程执行完毕
+                        parsePostExecutorService.shutdown();
+                        parsePostExecutorService.awaitTermination(spiderConfig.getService().getErrorTaskTimeoutMinute(), TimeUnit.MINUTES);
+                        return;
+                    }
+                    // 如果是中断
+                    if (isInterrupt) {
                         // 停止任务
                         spiderTaskManager.interruptAndRemove(spiderTaskId,isInterrupt);
-                        return;
                     }
 
                     parsePostExecutorService.execute(new ParsePostTask(
@@ -154,6 +174,8 @@ public class SpiderMainTask {
         this.isInterrupt = true;
         // 关闭线程池,只关闭这一个,另一个已经在之前关闭了
         parsePostExecutorService.shutdown();
+        // 关闭http连接池
+        httpClientUtil.shutdown();
         // 该任务结束表示总任务结束,修改任务状态为结束,并记录结束时间
         spiderTaskRepository.save(spiderTask
                 .setStatus(isInterrupt ? SpiderTaskStatusEnum.INTERRUPT.getCode() : SpiderTaskStatusEnum.END.getCode())

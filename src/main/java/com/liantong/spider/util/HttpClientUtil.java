@@ -215,6 +215,7 @@ public class HttpClientUtil {
 //			if(!isRequestSuccess(response))
 //				throw new RuntimeException(LOG  + "请求失败.当前状态码：" + response.getStatusLine().getStatusCode() +  ",当前路径：" + request.getURI());
             return getStringResultByResponse(response);
+
         }
     }
 
@@ -231,9 +232,15 @@ public class HttpClientUtil {
 
     /**
      * {@link CloseableHttpResponse} 提取String返回结果
+     *
+     * 该方法中, 增加 EntityUtils.consume(entity);操作,
+     * 只有将该实体和response都释放掉,才会完整的释放连接
      */
     public String getStringResultByResponse(CloseableHttpResponse response) throws IOException {
-        return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
+        HttpEntity entity = response.getEntity();
+        String result = EntityUtils.toString(entity, Consts.UTF_8);
+        EntityUtils.consume(entity);
+        return result;
     }
 
     /**
@@ -377,6 +384,12 @@ public class HttpClientUtil {
                 CHROME_HEADERS);
 
     }
+    /**
+     * 关闭
+     */
+    public void shutdown() {
+        pool.shutdown();
+    }
 
 
     // 其他方法--------------------------
@@ -479,11 +492,11 @@ public class HttpClientUtil {
     @NoArgsConstructor
     @Accessors(chain = true)
     public static class DefaultHttpClientConfig implements HttpClientConfigurable {
-        private Integer maxConnectionNum = 600;
+        private Integer maxConnectionNum = 300;
         private Integer maxPerRoute = Integer.MAX_VALUE;
-        private Integer socketTimeout = 2000;
-        private Integer connectionRequestTimeout = 5000;
-        private Integer connectionTimeout = 2000;
+        private Integer socketTimeout = 3000;
+        private Integer connectionRequestTimeout = 10000;
+        private Integer connectionTimeout = 3000;
         private List<String> customCookieKeys = new LinkedList<>();
         private Map<String, List<Header>> customHeaders = new HashMap<>();
     }
